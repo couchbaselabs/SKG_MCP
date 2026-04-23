@@ -33,6 +33,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
+import threading
+
 from openai import OpenAI
 from mcp.server.fastmcp import FastMCP
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -79,9 +81,26 @@ TOP_K_TRACE       = 5
 
 # ── State ─────────────────────────────────────────────────────────────────────
 _state: dict[str, Any] = {}
+_init_lock = threading.Lock()
+
 
 def _bn() -> str:
     return _state["bucket_name"]
+
+
+class _InitMiddleware(BaseHTTPMiddleware):
+    """Lazily initialises state on first request in each worker process."""
+    async def dispatch(self, request, call_next):
+        if "cluster" not in _state:
+            with _init_lock:
+                if "cluster" not in _state:
+                    _init_state(
+                        os.environ["CB_ENDPOINT"],
+                        os.environ["CB_USERNAME"],
+                        os.environ["CB_PASSWORD"],
+                        os.environ["CB_BUCKET"],
+                    )
+        return await call_next(request)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -892,6 +911,12 @@ No implementation code anywhere. Every item in the Rule 3 checklist must be cove
     return _log_result("generate_design_doc", result)
 
 
+# ── Module-level app (required for uvicorn multi-worker import string) ────────
+app = mcp.streamable_http_app()
+app.add_middleware(_DynamicConfigMiddleware)
+app.add_middleware(_InitMiddleware)
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -914,15 +939,15 @@ if __name__ == "__main__":
         if not val:
             print(f"ERROR: {flag} is required (or set env var)"); sys.exit(1)
 
-    CHUNK_COLLECTION     = args.chunk_collection
-    STRUCTURE_COLLECTION = args.structure_collection
-
-    _init_state(args.cb_endpoint, args.cb_username, args.cb_password, args.bucket)
-
-    app = mcp.streamable_http_app()
-    app.add_middleware(_DynamicConfigMiddleware)
+    # Set env vars so each worker process inherits them and can lazy-init state
+    os.environ["CB_ENDPOINT"]            = args.cb_endpoint
+    os.environ["CB_USERNAME"]            = args.cb_username
+    os.environ["CB_PASSWORD"]            = args.cb_password
+    os.environ["CB_BUCKET"]              = args.bucket
+    os.environ["CB_CHUNK_COLLECTION"]    = args.chunk_collection
+    os.environ["CB_STRUCTURE_COLLECTION"]= args.structure_collection
 
     print(f"Starting MCP server → http://0.0.0.0:{args.port}/mcp")
     print(f"  scope and vector_index are dynamic — pass as URL query params")
     print(f"  e.g. http://server:{args.port}/mcp?scope=team_xyz&vector_index=my_index")
-    uvicorn.run(app, host="0.0.0.0", port=args.port, workers=args.workers)
+    uvicorn.run("mcp_server:app", host="0.0.0.0", port=args.port, workers=args.workers)
