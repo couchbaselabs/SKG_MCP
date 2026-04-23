@@ -13,10 +13,12 @@ export GEMINI_API_KEY="..."
 
 ### Start the server
 ```
-python mcp_server.py --cb-endpoint couchbases://your-cluster.cloud.couchbase.com --cb-username your-user --cb-password your-password --bucket YourBucket --chunk-collection DesignDocdata --structure-collection file_structure --port port_number
+python mcp_server.py --cb-endpoint couchbases://your-cluster.cloud.couchbase.com --cb-username your-user --cb-password your-password --bucket YourBucket --chunk-collection DesignDocdata --structure-collection file_structure --port 8000 --workers 4
 ```
 
 `--chunk-collection` and `--structure-collection` are optional — they default to `DesignDocdata` and `file_structure`.
+
+`--workers` defaults to `4` — each worker is a separate process with its own Couchbase connection, so concurrent users don't block each other. Increase if more team members are hitting the server simultaneously.
 
 All flags can also be set as env vars (`CB_ENDPOINT`, `CB_USERNAME`, `CB_PASSWORD`, `CB_BUCKET`, `CB_CHUNK_COLLECTION`, `CB_STRUCTURE_COLLECTION`) and omitted from the command.
 

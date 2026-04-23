@@ -893,6 +893,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="MCP server")
     parser.add_argument("--port",                type=int, default=8000)
+    parser.add_argument("--workers",             type=int, default=4,    help="Number of uvicorn worker processes")
     parser.add_argument("--cb-endpoint",         default=os.environ.get("CB_ENDPOINT", ""),                  help="Couchbase connection string")
     parser.add_argument("--cb-username",         default=os.environ.get("CB_USERNAME", ""),                  help="Couchbase username")
     parser.add_argument("--cb-password",         default=os.environ.get("CB_PASSWORD", ""),                  help="Couchbase password")
@@ -917,4 +918,4 @@ if __name__ == "__main__":
     print(f"Starting MCP server → http://0.0.0.0:{args.port}/mcp")
     print(f"  scope and vector_index are dynamic — pass as URL query params")
     print(f"  e.g. http://server:{args.port}/mcp?scope=team_xyz&vector_index=my_index")
-    uvicorn.run(app, host="0.0.0.0", port=args.port)
+    uvicorn.run(app, host="0.0.0.0", port=args.port, workers=args.workers)
