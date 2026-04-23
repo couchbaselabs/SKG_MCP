@@ -109,6 +109,7 @@ class _InitMiddleware(BaseHTTPMiddleware):
 
 mcp = FastMCP(
     "skg_mcp",
+    host="0.0.0.0",
     instructions=(
         "Call startup(working_dir=<your current working directory>) at session start.\n"
         "It returns repo overviews for repos matching your directory — read them carefully.\n"
