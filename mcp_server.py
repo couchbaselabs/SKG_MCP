@@ -26,6 +26,8 @@ from __future__ import annotations
 import json
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 from contextvars import ContextVar
 from datetime import timedelta
 from pathlib import Path

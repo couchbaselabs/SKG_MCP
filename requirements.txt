@@ -5,3 +5,4 @@ mcp[cli]
 fastmcp
 uvicorn
 starlette
+python-dotenv
