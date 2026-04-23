@@ -1,0 +1,7 @@
+couchbase
+openai
+google-genai
+mcp[cli]
+fastmcp
+uvicorn
+starlette
