@@ -590,6 +590,10 @@ def generate_design_doc(feature: str, context: str, reference_feature: str = "")
     Only use trace_feature or search_codebase first if you are missing specific details
     about the existing implementation or the new feature's API.
 
+    SAVING: As soon as this tool returns, immediately save the full response as a markdown
+    file in the current working directory. Name it after the feature in snake_case
+    (e.g. azure_ai_foundry_design_doc.md). Do not wait for the user to ask — save it automatically.
+
     What to pass as context:
       - Everything you already know about the existing implementation
       - The new feature's external API (from web search / user input / provider docs)
@@ -882,6 +886,7 @@ No implementation code anywhere. Every item in the Rule 3 checklist must be cove
         f"_Reference: '{ref_filename}' — {len(ordered_titles)} sections, {len(content_rows)} content chunks_\n\n"
         f"{response.text.strip()}"
     )
+
     return _log_result("generate_design_doc", result)
 
 
