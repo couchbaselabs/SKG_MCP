@@ -13,7 +13,7 @@ export GEMINI_API_KEY="..."
 
 ### Start the server
 ```
-python mcp_server.py --cb-endpoint couchbases://your-cluster.cloud.couchbase.com --cb-username your-user --cb-password your-password --bucket YourBucket --chunk-collection DesignDocdata --structure-collection file_structure --port 8000 --workers 4
+python mcp_server.py --cb-endpoint couchbases://your-cluster.cloud.couchbase.com --cb-username your-user --cb-password your-password --bucket YourBucket --chunk-collection DesignDocdata --structure-collection file_structure --port 8000 --workers 1
 ```
 
 `--chunk-collection` and `--structure-collection` are optional — they default to `DesignDocdata` and `file_structure`.
